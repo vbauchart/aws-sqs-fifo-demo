@@ -35,12 +35,13 @@ do
 	Body=$(echo "$MESSAGE" | jq -r .Messages[].Body)
 	MessageGroupId=$(echo "$MESSAGE" | jq -r .Messages[].Attributes.MessageGroupId)
 
-	echo "RECEIVE: $Body (GROUP: $MessageGroupId)" | tee -a "receive_group_${MessageGroupId}.txt"
+	echo "RECEIVE: $Body (GROUP: $MessageGroupId)"
 
-	# This block is asynchronuous
+	# This block goes in a thread
 	# Fake a message processing by waiting randomly some seconds
 	(
 		sleep $(( RANDOM % 10 ))
+		echo "$Body (GROUP: $MessageGroupId)" >> "/tmp/receive_group_${MessageGroupId}.txt"
 		echo "AKNEWLEDGE $Body (GROUP: $MessageGroupId)"
 		aws sqs delete-message --queue-url "${QUEUE_URL}" --receipt-handle "$ReceiptHandle"
 	) &

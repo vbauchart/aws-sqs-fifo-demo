@@ -11,7 +11,7 @@ fi
 QUEUE_URL=$(aws sqs create-queue --queue-name "$QUEUE_NAME".fifo --attributes FifoQueue=true,ContentBasedDeduplication=false | jq -r .QueueUrl)
 
 # delete files from previous run
-rm receive_group_* || true
+rm /tmp/receive_group_* || true
 
 # Send a lot of message in the queue
 for i in $(seq 0 99);
