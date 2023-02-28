@@ -34,10 +34,11 @@ done
 while true;
 do
 	# Stop when empty
-	messagesLeft_quoted=$(aws sqs get-queue-attributes --queue-url "${QUEUE_URL}" --attribute-name ApproximateNumberOfMessages | jq .Attributes.ApproximateNumberOfMessages)
-	messagesLeft=$(eval echo "$messagesLeft_quoted")
-	echo "MESSAGE TOTAL $messagesLeft"
-	if [ "$messagesLeft" = 0 ]; then
+	messagesLeft=$(aws sqs get-queue-attributes --queue-url "${QUEUE_URL}" --attribute-name ApproximateNumberOfMessages ApproximateNumberOfMessagesNotVisible)
+	numberTotal=$(echo "$messagesLeft" | jq -r .Attributes.ApproximateNumberOfMessages)
+	messagesInFlight=$(echo "$messagesLeft" | jq -r .Attributes.ApproximateNumberOfMessagesNotVisible)
+	echo "MESSAGE TOTAL $numberTotal ($messagesInFlight in flight)"
+	if [ "$(( numberTotal + messagesInFlight ))" -eq 0 ]; then
 		echo "QUEUE EMPTY"
 		break
 	fi
